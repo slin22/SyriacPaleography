@@ -31,12 +31,17 @@ img:hover {
 
 <h1>Syriac Manuscripts</h1>
 
-File name:<br>
+File name:
 <input id="myinput" type ="text" name = "filename">
 <br>
-
+Min date:
+<input id="min" type="number" name="min">
+<br>
+Max date:
+<input id="max" type="number" name="max">
+<br>
 <button id="submitButton">Submit</button>
-
+<br>
 <br>
 
 <script>
@@ -72,8 +77,6 @@ function appendImages(input) {
 d3.select('#submitButton').on('click', function() {
     $(".mylink").remove();
     var input = $("#myinput").val()
-    console.log("here")
-    console.log(input)
 
     appendImages(input);
 
