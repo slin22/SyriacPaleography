@@ -52,7 +52,7 @@ function appendImages(input) {
     data.forEach(function(d) {
         console.log(d);
         var x = document.createElement("IMG");
-        x.setAttri   bute("src", d.Image_Name);
+        x.setAttribute("src", d.Image_Name);
         x.setAttribute("width", "100");
 
         var a = document.createElement("a");
@@ -61,6 +61,7 @@ function appendImages(input) {
           a.setAttribute("href", d.Image_Name);
           a.appendChild(x);
         
+        //console.log( a.attributes )
         d3.select("body").append(function(){return a});
         //document.body.appendChild(a);
     });
@@ -78,6 +79,8 @@ d3.select('#submitButton').on('click', function() {
 
 });
 
+
+appendImages('');
 
 
 </script>
