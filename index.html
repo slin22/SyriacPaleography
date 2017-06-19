@@ -8,7 +8,7 @@ body {
     background: linear-gradient(to top, #ffffcc 0%, #996633 36%); padding-right: 20px; padding-left: 20px; color: burlywood; font-family: Lucida;
 }
 h1 {
-  font-family: Bookman; font-size: 300%; color: wheat;
+  font-family: Georgia; font-size: 300%; color: wheat;
 }
 input {
   border:1px;
@@ -27,15 +27,18 @@ img {
   width: 150px;
 }
 img:hover {
-  box-shadow: 0 0 2px 1px rgb(255, 182, 193);
+  box-shadow: 0 0 2px 1px rgb(255,235,205);
   
 }
+<link rel="stylesheet" href="src/css/swipebox.css">
+
 
 </style>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <!-- load the d3.js library -->    
 <script src="https://d3js.org/d3.v4.min.js"></script>
+
 
 </head>
 <body>
@@ -65,20 +68,45 @@ function appendImages(input) {
        throw error;
     }
 
+    var nested_array = [];
+    var temp = [];
+    var last_manuscript = data[0];
+    console.log(data);
+
     data.forEach(function(d) {
-        console.log(d);
+    	if (d.Manuscript_No != last_manuscript.Manuscript_No) {
+    		nested_array.push(temp);
+    		temp = [];
+    	}
+    	else{
+    		temp.push(d);
+    		last_manuscript = d;
+    	}
+
+    });
+
+    nested_array.push(temp);
+    console.log(nested_array);
+
+    nested_array.forEach(function(d) {
+
+    	console.log(d);
+    	var manuscript = d[0]
         var x = document.createElement("IMG");
-        x.setAttribute("src", d.Image_Name);
+        x.setAttribute("src", manuscript.Image_Name);
         x.setAttribute("width", "100");
 
         var a = document.createElement("a");
           a.setAttribute("class", "mylink");
           a.setAttribute("target", "_blank");
-          a.setAttribute("href", d.Image_Name);
+          a.setAttribute("href", manuscript.Image_Name);
           a.appendChild(x);
         
         d3.select("body").append(function(){return a});
+
     });
+       
+    
   });
 
 }
