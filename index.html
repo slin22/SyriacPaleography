@@ -41,15 +41,21 @@ img:hover {
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="lib/jquery-2.1.0.min.js"></script>
 <script src="src/js/jquery.swipebox.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 </head>
 <body>
 
 <h1>Syriac Manuscripts</h1>
 <h4>
-File name:
-<input id="myinput" type ="text" name = "filename">
+
+<div class="ui-widget">
+  <label for="myinput">File name: </label>
+  <input id="myinput" name="filename">
+</div>
+
 <br>
+
 Min date:
 <input id="min" type="number" name="min">
 <br>
@@ -130,12 +136,37 @@ function appendImages(input) {
 
         });
 
-        
-    });
-       
+
     
-  };
+  });
+};
   $( '.swipebox' ).swipebox();
+
+
+  d3.json("getFullData.php", function(error, data2) {
+    if (error) {
+       console.log("Something went wrong...");
+       throw error;
+    }
+	var availableTags = [];
+	
+	var last__manuscript = data2[0];
+	availableTags.push(last__manuscript);
+
+    data2.forEach(function(d) {
+    	if (d.Manuscript_No != last__manuscript.Manuscript_No) {
+    		availableTags.push(d.Manuscript_No);
+    		last__manuscript = d;
+    	}
+
+});
+console.log(availableTags);
+$( "#myinput" ).autocomplete({
+	source:availableTags
+});
+
+});
+
 
 
 
@@ -148,7 +179,7 @@ d3.select('#submitButton').on('click', function() {
 });
 
 
-appendImages('');
+ appendImages('');
 
 
 </script>
