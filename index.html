@@ -54,16 +54,17 @@ img:hover {
   <label for="myinput">File name: </label>
   <input id="myinput" name="filename">
 </div>
+<button id="submitButton">Submit</button>
 
 <br>
 
 Min date:
 <input id="min" name="min">
-<button id="submitdatebutton"/>Submit</button>
+
 <br>
 Max date:
 <input id="max" type="number" name="max">
-<button id="submitButton">Submit</button>
+<button id="submitdatebutton"/>Submit</button>
 
 <br>
 <br>
@@ -146,14 +147,15 @@ function appendImages(input) {
     
   });
 };
-function getAvailableTags(input) {
+function getAvailableTags(input1, input2) {
 
-	d3.json("getFullData.php?min="+input, function(error, data2) {
+	d3.json("getFullData.php?min="+input1+"&max="+input2, function(error, data2) {
     if (error) {
        console.log("Something went wrong...");
        throw error;
     }
 	var availableTags = [];
+	var tagWithDates = [];
 	
 	var last__manuscript = data2[0];
 	availableTags.push(last__manuscript);
@@ -161,12 +163,13 @@ function getAvailableTags(input) {
     data2.forEach(function(d) {
     	if (d.Manuscript_No != last__manuscript.Manuscript_No) {
     		availableTags.push(d.Manuscript_No);
+    		tagWithDates.push(d.Date);
     		last__manuscript = d;
     	}
 
 });
-console.log("here");
 console.log(availableTags);
+console.log(tagWithDates);
 	$( "#myinput" ).autocomplete({
 	source:availableTags
 });
@@ -175,9 +178,10 @@ console.log(availableTags);
 }
 
 d3.select('#submitdatebutton').on('click', function(){
-	var input = $("#min").val()
+	var input1 = $("#min").val()
+	var input2 = $("#max").val()
 
-	getAvailableTags(input);
+	getAvailableTags(input1, input2);
 });
 
   $( '.swipebox' ).swipebox();
