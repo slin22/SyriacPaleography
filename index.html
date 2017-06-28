@@ -50,20 +50,20 @@ img:hover {
 <h1>Syriac Manuscripts</h1>
 <h4>
 
-<div class="ui-widget">
-  <label for="myinput">File name: </label>
-  <input id="myinput" name="filename">
-</div>
+Choose a file name or a date range
+<br>
+File name will update with date range
+<br>
+<br>
+<label for="myinput">File name: </label>
+<input class="ui-widget" id="myinput" name="filename">
 <button id="submitButton">Submit</button>
-
 <br>
 
-Min date:
-<input id="min" name="min">
-
 <br>
-Max date:
-<input id="max" type="number" name="max">
+From <input id="min" name="min">
+
+To <input id="max" type="number" name="max">
 <button id="submitdatebutton"/>Submit</button>
 
 <br>
@@ -199,7 +199,32 @@ d3.select('#submitButton').on('click', function() {
 
  appendImages('');
 
+d3.json("getFullData.php?", function(error, data2) {
+    if (error) {
+       console.log("Something went wrong...");
+       throw error;
+    }
+	var availableTags = [];
+	var tagWithDates = [];
+	
+	var last__manuscript = data2[0];
+	availableTags.push(last__manuscript);
 
+    data2.forEach(function(d) {
+    	if (d.Manuscript_No != last__manuscript.Manuscript_No) {
+    		availableTags.push(d.Manuscript_No);
+    		tagWithDates.push(d.Date);
+    		last__manuscript = d;
+    	}
+
+});
+console.log(availableTags);
+console.log(tagWithDates);
+	$( "#myinput" ).autocomplete({
+	source:availableTags
+});
+
+});
 
 
 </script>
