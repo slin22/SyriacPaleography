@@ -3,8 +3,6 @@
 <meta charset="utf-8">
 <style> /* set the CSS */
 
-
-
 body {
     background: linear-gradient(to top, #ffffcc 0%, #996633 36%); padding-right: 20px; padding-left: 20px; color: burlywood; font-family: Lucida;
 }
@@ -42,6 +40,9 @@ img:hover {
 <script src="lib/jquery-2.1.0.min.js"></script>
 <script src="src/js/jquery.swipebox.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+
 
 </head>
 <body>
@@ -57,18 +58,23 @@ img:hover {
 <br>
 
 Min date:
-<input id="min" type="number" name="min">
+<input id="min" name="min">
+<button id="submitdatebutton"/>Submit</button>
 <br>
 Max date:
 <input id="max" type="number" name="max">
 <button id="submitButton">Submit</button>
+
 <br>
 <br>
 <hr>
 </h4>
 <script>
+	
+
 
 function appendImages(input) {
+
   
   var counter = 1;
   d3.json("getData.php?filename="+input, function(error, data) {
@@ -140,10 +146,9 @@ function appendImages(input) {
     
   });
 };
-  $( '.swipebox' ).swipebox();
+function getAvailableTags(input) {
 
-
-  d3.json("getFullData.php", function(error, data2) {
+	d3.json("getFullData.php?min="+input, function(error, data2) {
     if (error) {
        console.log("Something went wrong...");
        throw error;
@@ -160,12 +165,23 @@ function appendImages(input) {
     	}
 
 });
+console.log("here");
 console.log(availableTags);
-$( "#myinput" ).autocomplete({
+	$( "#myinput" ).autocomplete({
 	source:availableTags
 });
 
 });
+}
+
+d3.select('#submitdatebutton').on('click', function(){
+	var input = $("#min").val()
+
+	getAvailableTags(input);
+});
+
+  $( '.swipebox' ).swipebox();
+
 
 
 d3.select('#submitButton').on('click', function() {
@@ -180,11 +196,10 @@ d3.select('#submitButton').on('click', function() {
  appendImages('');
 
 
+
+
 </script>
 
-
-
 </body>
-
 
 </html>
