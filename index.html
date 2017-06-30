@@ -23,6 +23,7 @@ img {
   border: 1px;
   border-radius: 4px;
   padding: 5px;
+  height: 250px;
   width: 150px;
 }
 img:hover {
@@ -260,7 +261,7 @@ function split( val ) {
 function extractLast( term ) {
       return split( term ).pop();
     }
-    
+
 $( "#myinput" )
       .on( "keydown", function( event ) {
         if ( event.keyCode === $.ui.keyCode.TAB &&
