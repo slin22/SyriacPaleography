@@ -50,7 +50,6 @@ img:hover {
 
 <h1>Syriac Manuscripts</h1>
 <h4>
-
 Choose a file name or a date range
 <br>
 File name will update with date range
@@ -73,133 +72,141 @@ To <input id="max" type="number" name="max">
 </h4>
 <script>
 
-function append(input) {
-  var URL = "getData.php?filename="+input;
+//var all_manuscripts = [];
+
+var manuscriptsPromise;
+//var URL = "getData.php?filename="+input;
 
 // get the data from getData.php and store it as 'data'
 
-  d3.json(URL, function(error, data) {
-    if (error) {
-      console.log("Something went wrong...");
-      throw error;
+function loadManuscripts(input) {
+  manuscriptsPromise = new Promise(function(resolve, reject) {
+    if (input) {
+      var url = "getData.php?filename="+input;
+    } else {
+      var url = "getData.php";
     }
 
-  /* 
-    For the purpose of creating only one thumbnail for each manuscript, only the first page of a manuscript will be displayed as a thumbnail. Use a 'pages' array to store all the pages that have the same manuscript number (manuscript name). Use a nested array 'manuscripts' to then store all the pages that have already been grouped by manuscript number.
-  */
-
-    var manuscripts = [];
-    var pages = [];
-    var last_manuscript = data[0];
-    var manuscript_count = 0;
-    var temp_count = 15;
-
-    data.forEach(function(manuscript_page) {
-
-      if (manuscript_page.Manuscript_No != last_manuscript.Manuscript_No && manuscript_count < temp_count) {
-        manuscripts.push(pages);
-        manuscript_count += 1;
-        pages = [];
-        pages.push(manuscript_page);
-        last_manuscript = manuscript_page;
-      }
-      else{
-        pages.push(manuscript_page);
-        last_manuscript = manuscript_page;
+    d3.json(url, function(error, data) { 
+      if (error) {
+        console.log("Something went wrong...");
+        throw error;
       }
 
+    /* 
+      For the purpose of creating only one thumbnail for each manuscript, only the first page of a manuscript will be displayed as a thumbnail. Use a 'pages' array to store all the pages that have the same manuscript number (manuscript name). Use a nested array 'manuscripts' to then store all the pages that have already been grouped by manuscript number.
+    */
+
+      var manuscripts = [];
+      var pages = [];
+      var last_manuscript = data[0];
+      var all_manuscripts = [];
+
+      data.forEach(function(manuscript_page) {
+
+        if (manuscript_page.Manuscript_No != last_manuscript.Manuscript_No) {
+          manuscripts.push(pages);
+          pages = [];
+          pages.push(manuscript_page);
+          last_manuscript = manuscript_page;
+        }
+        else{
+          pages.push(manuscript_page);
+          last_manuscript = manuscript_page;
+        }
+
+      });
+
+      manuscripts.push(pages);
+      resolve(manuscripts);
+      console.log("inside loadmanu", manuscripts.length);
     });
-
-    manuscripts.push(pages);
+    console.log("loading manuscripts done.")
+    console.log(url);
 
   });
 }
 
-function appendImages(input) {
 
-// URL for getData from input
-// counter variable for grouping images
+loadManuscripts(); // load all manuscripts on page load
 
-  var counter = 1;
-  var URL = "getData.php?filename="+input;
+console.log("calling append images")
 
-// get the data from getData.php and store it as 'data'
+var counter = 10;
+var temp = 0;
+var num_displayed;
 
-  d3.json(URL, function(error, data) {
-    if (error) {
-       console.log("Something went wrong...");
-       throw error;
-    }
+function appendImages() {
 
-  /* 
-    For the purpose of creating only one thumbnail for each manuscript, only the first page of a manuscript will be displayed as a thumbnail. Use a 'pages' array to store all the pages that have the same manuscript number (manuscript name). Use a nested array 'manuscripts' to then store all the pages that have already been grouped by manuscript number.
-  */
+  manuscriptsPromise.then(function(result) {
+    // URL for getData from input
+    // counter variable for grouping images
+    console.log(result);
+        if (result[0].length != 0) {
+          //while (manuscript_length < number) {
 
-    var manuscripts = [];
-    var pages = [];
-    var last_manuscript = data[0];
-    var manuscript_count = 0;
+              if (result.length > counter) {
+                num_displayed = counter;
+              }
+              else{
+                num_displayed = result.length;
+                temp = 0;
+              }
+              console.log(temp);
+              console.log(num_displayed);
+              for (var i=temp; i<num_displayed; i++) {
+                var array = result[i];
+                console.log(array);
+                console.log("temp = ", temp);
+                console.log("num_displayed =", num_displayed);
+                   for (var j=0; j < array.length; j++) {
+                    var manuscript = array[j];
+                    var a = document.createElement("a");
+                    a.setAttribute("href", manuscript.Image_Name);
+                    a.setAttribute("target", "_blank"); 
+                    a.setAttribute("class", "swipebox");
+                    a.setAttribute("title", manuscript.Manuscript_No + " " + manuscript.Page_No);
+                    a.setAttribute("rel", "gallery-"+i);
 
-    data.forEach(function(manuscript_page) {
+                    if (j != 0) {
+                      var x = document.createElement("IMG");
+                      x.setAttribute("src", manuscript.Image_Name);
+                      x.setAttribute("alt", manuscript.Manuscript_No);
+                      x.setAttribute("width", "100");
+                      x.setAttribute("style", "display: none;");
 
-      if (manuscript_page.Manuscript_No != last_manuscript.Manuscript_No) {
-    		manuscripts.push(pages);
-        manuscript_count += 1;
-    		pages = [];
-    		pages.push(manuscript_page);
-    		last_manuscript = manuscript_page;
-      }
-      else{
-    		pages.push(manuscript_page);
-    		last_manuscript = manuscript_page;
-      }
+                    }
+                    else {
+                      var x = document.createElement("IMG");
+                      x.setAttribute("src", manuscript.Image_Name);
+                      x.setAttribute("width", "100");
+                      x.setAttribute("title", manuscript.Page_No);
+                    }
 
+
+                    a.appendChild(x);
+                    d3.select("body").append(function(){return a});
+                  }
+                
+                    
+            }
+                console.log("jere");
+                  if (10 - (num_displayed%10)< 10) {
+                       counter += num_displayed % 10;
+                   }
+                  else {
+                        counter += 10;
+                  }
+                  temp = num_displayed;
+        }
+      //}
     });
-      manuscripts.push(pages);
-  
+
+
+  };
 
 
 
-
-    /*
-      For each of the manuscripts in the nested array 'manuscripts', loop through each page of the manuscript and create swipebox images of each, categorizing them by manuscript number using 'gallery-'+counter.
-    */
-
-  manuscripts.forEach(function(array) {
-    for (var i=0; i < array.length; i++) {
-	    	var manuscript = array[i];
-	      var a = document.createElement("a");
-	      a.setAttribute("href", manuscript.Image_Name);
-	      a.setAttribute("target", "_blank"); 
-	      a.setAttribute("class", "swipebox");
-	      a.setAttribute("title", manuscript.Manuscript_No + " " + manuscript.Page_No);
-	      a.setAttribute("rel", "gallery-"+counter);
-
-	      if (i != 0) {
-	        var x = document.createElement("IMG");
-	        x.setAttribute("src", manuscript.Image_Name);
-	        x.setAttribute("width", "100");
-	        x.setAttribute("style", "display: none;");
-
-	      }
-	      else {
-	        var x = document.createElement("IMG");
-	        x.setAttribute("src", manuscript.Image_Name);
-	        x.setAttribute("width", "100");
-	        x.setAttribute("title", manuscript.Page_No);
-	      }
-
-	      a.appendChild(x);
-	      d3.select("body").append(function(){return a});
-
-    }
-
-    counter += 1;
-
-  });
-  });
-
-};
 
 
 //getAvailableTags function for autocomplete feature in search bar.
@@ -261,13 +268,18 @@ d3.select('#submitdatebutton').on('click', function(){
   var input2 = $("#max").val()
   getAvailableTags(input1, input2);
 });
-  $( '.swipebox' ).swipebox();
+
+$( '.swipebox' ).swipebox();
+
 d3.select('#submitButton').on('click', function() {
     $(".swipebox").remove();
     var input = $("#myinput").val()
-    appendImages(input);
+    loadManuscripts(input);
+    appendImages();
 });
- appendImages('');
+
+ //appendImages(10);
+
 d3.json("getFullData.php?", function(error, data2) {
     if (error) {
        console.log("Something went wrong...");
@@ -321,7 +333,8 @@ $( "#myinput" )
 
 </script>
 
-<button id="next_page" onclick="append('')">Next Page</button>
+<button id="next_page" onclick="appendImages()">Load more</button>
+Saved Manuscripts
 
 </body>
 
