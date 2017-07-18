@@ -30,6 +30,9 @@ img:hover {
   box-shadow: 0 0 2px 1px rgb(255,235,205);
   
 }
+#next_page {
+  float: right; padding: 20px; margin: 20px;
+}
 
 </style>
 
@@ -43,9 +46,9 @@ img:hover {
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
-
-
 </head>
+
+
 <body>
 
 <h1>Syriac Manuscripts</h1>
@@ -70,6 +73,17 @@ To <input id="max" type="number" name="max">
 <br>
 <hr>
 </h4>
+
+<div id="myImages"></div>
+
+<button id="next_page" onclick="appendImages()">Load more</button>
+
+
+</body>
+
+</html>
+
+
 <script>
 
 //var all_manuscripts = [];
@@ -132,7 +146,7 @@ loadManuscripts(); // load all manuscripts on page load
 
 console.log("calling append images")
 
-var counter = 10;
+var counter = 7;
 var temp = 0;
 var num_displayed;
 
@@ -185,17 +199,17 @@ function appendImages() {
 
 
                     a.appendChild(x);
-                    d3.select("body").append(function(){return a});
+                    d3.select("#myImages").append(function(){return a});
                   }
                 
                     
             }
                 console.log("jere");
-                  if (10 - (num_displayed%10)< 10) {
-                       counter += num_displayed % 10;
+                  if (7 - (num_displayed%7)< 7) {
+                       counter += num_displayed % 7;
                    }
                   else {
-                        counter += 10;
+                        counter += 7;
                   }
                   temp = num_displayed;
         }
@@ -332,10 +346,3 @@ $( "#myinput" )
 });
 
 </script>
-
-<button id="next_page" onclick="appendImages()">Load more</button>
-Saved Manuscripts
-
-</body>
-
-</html>
