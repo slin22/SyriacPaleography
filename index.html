@@ -33,6 +33,12 @@ img:hover {
 #next_page {
   float: right; padding: 20px; margin: 20px;
 }
+#check {
+  bottom: 0px; right: 0px;
+}
+#container {
+  display: inline-block; width: 100px; height: 100px; float: left; margin-left: 10px;
+}
 
 </style>
 
@@ -77,7 +83,7 @@ To <input id="max" type="number" name="max">
 <div id="myImages"></div>
 
 <button id="next_page" onclick="appendImages()">Load more</button>
-
+<button id="save">Save Manuscripts</button>
 
 </body>
 
@@ -89,6 +95,9 @@ To <input id="max" type="number" name="max">
 //var all_manuscripts = [];
 
 var manuscriptsPromise;
+var counter = 7;
+var temp = 0;
+var num_displayed;
 //var URL = "getData.php?filename="+input;
 
 // get the data from getData.php and store it as 'data'
@@ -133,10 +142,8 @@ function loadManuscripts(input) {
 
       manuscripts.push(pages);
       resolve(manuscripts);
-      console.log("inside loadmanu", manuscripts.length);
     });
-    console.log("loading manuscripts done.")
-    console.log(url);
+
 
   });
 }
@@ -144,18 +151,12 @@ function loadManuscripts(input) {
 
 loadManuscripts(); // load all manuscripts on page load
 
-console.log("calling append images")
-
-var counter = 7;
-var temp = 0;
-var num_displayed;
 
 function appendImages() {
 
   manuscriptsPromise.then(function(result) {
     // URL for getData from input
     // counter variable for grouping images
-    console.log(result);
         if (result[0].length != 0) {
           //while (manuscript_length < number) {
 
@@ -164,23 +165,26 @@ function appendImages() {
               }
               else{
                 num_displayed = result.length;
-                temp = 0;
+                if (temp == num_displayed) {
+                  temp = num_displayed;
+                }else{
+                  temp = 0;
+                }
               }
-              console.log(temp);
-              console.log(num_displayed);
+
               for (var i=temp; i<num_displayed; i++) {
                 var array = result[i];
-                console.log(array);
-                console.log("temp = ", temp);
-                console.log("num_displayed =", num_displayed);
                    for (var j=0; j < array.length; j++) {
                     var manuscript = array[j];
+                    var d = document.createElement("span");
+                    d.setAttribute("class", "container");
                     var a = document.createElement("a");
                     a.setAttribute("href", manuscript.Image_Name);
                     a.setAttribute("target", "_blank"); 
                     a.setAttribute("class", "swipebox");
                     a.setAttribute("title", manuscript.Manuscript_No + " " + manuscript.Page_No);
                     a.setAttribute("rel", "gallery-"+i);
+                    
 
                     if (j != 0) {
                       var x = document.createElement("IMG");
@@ -191,20 +195,28 @@ function appendImages() {
 
                     }
                     else {
+                      var y = document.createElement("input");
+                      y.setAttribute("type", "checkbox");
+                      y.setAttribute("class", "checkbox");
+                      y.setAttribute("id", "check");
+                      y.setAttribute("value", manuscript.Manuscript_No);
                       var x = document.createElement("IMG");
                       x.setAttribute("src", manuscript.Image_Name);
                       x.setAttribute("width", "100");
                       x.setAttribute("title", manuscript.Page_No);
                     }
-
-
+                    //x.appendChild(y);
                     a.appendChild(x);
-                    d3.select("#myImages").append(function(){return a});
+                    d.appendChild(y);
+                    //d.appendChild(y);
+                    d.appendChild(a);
+
+                    
+                    d3.select("#myImages").append(function(){return d});
                   }
                 
                     
             }
-                console.log("jere");
                   if (7 - (num_displayed%7)< 7) {
                        counter += num_displayed % 7;
                    }
@@ -291,6 +303,16 @@ d3.select('#submitButton').on('click', function() {
     loadManuscripts(input);
     appendImages();
 });
+
+d3.select('#save').on('click', function() {
+  var val = [];
+  $("input[type=checkbox]:checked").each(function(i){
+    val[i] = $(this).val();
+  });
+  console.log(val);
+
+});
+
 
  //appendImages(10);
 
