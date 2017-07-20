@@ -1,24 +1,22 @@
 <!DOCTYPE html>
+
 <head>
 <meta charset="utf-8">
 <style> /* set the CSS */
-
 body {
-    background: linear-gradient(to top, #ffffcc 0%, #996633 36%); padding-right: 20px; padding-left: 20px; color: burlywood; font-family: Lucida;
+    background: linear-gradient(to top, #ffffcc 0%, #996633 36%); padding-right: 20px; padding-left: 20px; font-family: Lucida;
 }
 h1 {
-  font-family: Georgia; font-size: 300%; color: wheat;
+  font-family: Georgia; font-size: 300%;
 }
 input {
-  border:1px;
+  border-color: black;
 }
-
 .line {
   fill: none;
   stroke: steelblue;
   stroke-width: 2px;
 }
-
 img {
   border: 1px;
   border-radius: 4px;
@@ -31,13 +29,19 @@ img:hover {
   
 }
 #next_page {
-  float: right; padding: 20px; margin: 20px;
+  float: right; padding: 10px; margin: 20px;
 }
 #check {
   bottom: 0px; right: 0px;
 }
 #container {
   display: inline-block; width: 100px; height: 100px; float: left; margin-left: 10px;
+}
+ul li {
+    display: inline ;
+}
+#content {
+  margin: 70px; background-color: white; padding: 20px;
 }
 
 </style>
@@ -51,12 +55,14 @@ img:hover {
 <script src="src/js/jquery.swipebox.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
+
 
 </head>
 
 
 <body>
-
+<div id="content">
 <h1>Syriac Manuscripts</h1>
 <h4>
 Choose a file name or a date range
@@ -82,51 +88,57 @@ To <input id="max" type="number" name="max">
 
 <div id="myImages"></div>
 
-<button id="next_page" onclick="appendImages()">Load more</button>
+<button id="next_page" onclick="loadManuscripts(); appendImages();">Load more</button>
 <button id="save">Save Manuscripts</button>
 
+<ul id="displaySavedImages"></ul>
+<ul id="savedImages"></ul>
+</div>
 </body>
-
 </html>
 
 
 <script>
-
 //var all_manuscripts = [];
-
 var manuscriptsPromise;
 var counter = 7;
 var temp = 0;
 var num_displayed;
+var saved_array = [];
+
+  // $( function() {
+  //   $( "#displaySavedImages" ).sortable({
+  //       items: "> li",
+  //       //tolerance: 'fit',
+  //       // drop: function () {
+  //       //     alert('delete!');
+  //       // }
+  //   });
+  //   $( "#displaySavedImages" ).disableSelection();
+  // } );
 //var URL = "getData.php?filename="+input;
-
 // get the data from getData.php and store it as 'data'
-
 function loadManuscripts(input) {
   manuscriptsPromise = new Promise(function(resolve, reject) {
     if (input) {
+
       var url = "getData.php?filename="+input;
     } else {
       var url = "getData.php";
     }
-
     d3.json(url, function(error, data) { 
       if (error) {
         console.log("Something went wrong...");
         throw error;
       }
-
     /* 
       For the purpose of creating only one thumbnail for each manuscript, only the first page of a manuscript will be displayed as a thumbnail. Use a 'pages' array to store all the pages that have the same manuscript number (manuscript name). Use a nested array 'manuscripts' to then store all the pages that have already been grouped by manuscript number.
     */
-
       var manuscripts = [];
       var pages = [];
       var last_manuscript = data[0];
       var all_manuscripts = [];
-
       data.forEach(function(manuscript_page) {
-
         if (manuscript_page.Manuscript_No != last_manuscript.Manuscript_No) {
           manuscripts.push(pages);
           pages = [];
@@ -137,26 +149,19 @@ function loadManuscripts(input) {
           pages.push(manuscript_page);
           last_manuscript = manuscript_page;
         }
-
       });
-
       manuscripts.push(pages);
       resolve(manuscripts);
     });
-
-
   });
 }
-
-
 loadManuscripts(); // load all manuscripts on page load
-
-
 function appendImages() {
-
   manuscriptsPromise.then(function(result) {
+    console.log(result);
     // URL for getData from input
     // counter variable for grouping images
+
         if (result[0].length != 0) {
           //while (manuscript_length < number) {
 
@@ -170,7 +175,8 @@ function appendImages() {
                 }else{
                   temp = 0;
                 }
-              }
+              
+            }
 
               for (var i=temp; i<num_displayed; i++) {
                 var array = result[i];
@@ -181,18 +187,16 @@ function appendImages() {
                     var a = document.createElement("a");
                     a.setAttribute("href", manuscript.Image_Name);
                     a.setAttribute("target", "_blank"); 
-                    a.setAttribute("class", "swipebox");
+                    a.setAttribute("class", "display swipebox");
                     a.setAttribute("title", manuscript.Manuscript_No + " " + manuscript.Page_No);
                     a.setAttribute("rel", "gallery-"+i);
                     
-
                     if (j != 0) {
                       var x = document.createElement("IMG");
                       x.setAttribute("src", manuscript.Image_Name);
                       x.setAttribute("alt", manuscript.Manuscript_No);
                       x.setAttribute("width", "100");
                       x.setAttribute("style", "display: none;");
-
                     }
                     else {
                       var y = document.createElement("input");
@@ -210,8 +214,7 @@ function appendImages() {
                     d.appendChild(y);
                     //d.appendChild(y);
                     d.appendChild(a);
-
-                    
+                    console.log("APPENDED");
                     d3.select("#myImages").append(function(){return d});
                   }
                 
@@ -223,20 +226,100 @@ function appendImages() {
                   else {
                         counter += 7;
                   }
-                  temp = num_displayed;
+                    temp = num_displayed;
+                  
         }
       //}
     });
+  };
 
+function getManuscript(manuscript_no, manuscripts) {
+  for(var i=0; i<manuscripts.length; i++) {
+    if (manuscripts[i][0].Manuscript_No == manuscript_no) {
+      return manuscripts[i]
+    }
+  }
+}
 
+function appendSavedImages(input) {
+  manuscriptsPromise.then(function(result) {
+        var array = getManuscript(input, result)
+
+        var manuscript_no = array[0].Manuscript_No //saved_array.length + 1;
+        // if (result[0].length != 0) {
+        //       for (var i=0; i<result.length; i++) {
+        //         var array = result[i];
+                  for (var j=0; j < array.length; j++) {
+                    var manuscript = array[j];
+                    var d = document.createElement("li");
+                    d.setAttribute("class", "ui-state-default");
+                    d.setAttribute("class", "drag-item");
+                    var a = document.createElement("a");
+                    a.setAttribute("href", manuscript.Image_Name);
+                    a.setAttribute("target", "_blank"); 
+                    a.setAttribute("class", "swipebox");
+                    a.setAttribute("title", manuscript.Manuscript_No + " " + manuscript.Page_No);
+                    a.setAttribute("rel", "gallery-"+manuscript_no);
+
+                    if (j == 0){
+
+                      var x = document.createElement("IMG");
+                      x.setAttribute("class", "draggable")
+                      x.setAttribute("src", manuscript.Image_Name);
+                      x.setAttribute("alt", manuscript.Manuscript_No);
+                      x.setAttribute("width", "100");
+                      //x.setAttribute("style", "display: none;");
+                      a.appendChild(x);
+                      d.appendChild(a);
+                      d3.select("#displaySavedImages").append(function(){return d});
+
+                    } else {
+
+                    
+                    if (j != 0) {
+
+                      var x = document.createElement("IMG");
+                      x.setAttribute("class", "draggable")
+                      x.setAttribute("src", manuscript.Image_Name);
+                      x.setAttribute("alt", manuscript.Manuscript_No);
+                      x.setAttribute("width", "100");
+                      x.setAttribute("style", "display: none;");
+                    }
+                    else {
+                      var y = document.createElement("input");
+                      y.setAttribute("type", "checkbox");
+                      y.setAttribute("class", "checkbox");
+                      y.setAttribute("id", "check");
+                      y.setAttribute("value", manuscript.Manuscript_No);
+                      var x = document.createElement("IMG");
+                      x.setAttribute("src", manuscript.Image_Name);
+                      x.setAttribute("width", "100");
+                      x.setAttribute("title", manuscript.Page_No);
+                    }
+                    //x.appendChild(y);
+                    //a.appendChild(x);
+                    //d.appendChild(y);
+                    //d.appendChild(y);
+                    //d.appendChild(a);
+
+                    //d3.select("#displayImages").append(function(){return d});
+
+                    }
+                  }
+
+            //count += 1;
+                
+                    
+            //}
+
+        //}
+      //}
+    })
+    
   };
 
 
-
-
-
 //getAvailableTags function for autocomplete feature in search bar.
-
 function getAvailableTags(input1, input2) {
 d3.json("getFullData.php?min="+input1+"&max="+input2, function(error, data2) {
     if (error) {
@@ -255,10 +338,11 @@ d3.json("getFullData.php?min="+input1+"&max="+input2, function(error, data2) {
         last__manuscript = d;
       }
 });
-
+    
 function split( val ) {
       return val.split( /,\s*/ );
     }
+
 function extractLast( term ) {
       return split( term ).pop();
     }
@@ -283,7 +367,7 @@ $( "#myinput" )
           terms.pop();
           terms.push( ui.item.value );
           terms.push( "" );
-          this.value = terms.join( ", " );
+          this.value = terms.join( "" );
           return false;
         }
       });
@@ -294,27 +378,43 @@ d3.select('#submitdatebutton').on('click', function(){
   var input2 = $("#max").val()
   getAvailableTags(input1, input2);
 });
-
 $( '.swipebox' ).swipebox();
 
 d3.select('#submitButton').on('click', function() {
-    $(".swipebox").remove();
-    var input = $("#myinput").val()
+    $(".checkbox").remove();
+    temp = 0;
+    $(".display.swipebox").remove();
+    var input = $("#myinput").val();
     loadManuscripts(input);
     appendImages();
+
 });
 
 d3.select('#save').on('click', function() {
   var val = [];
   $("input[type=checkbox]:checked").each(function(i){
     val[i] = $(this).val();
+    console.log(saved_array.indexOf(val[i]));
+    if (saved_array.indexOf(val[i]) == -1) {
+      //loadManuscripts(val[i]);
+      saved_array.push(val[i]);
+      appendSavedImages(val[i]);
+    }
+
   });
-  console.log(val);
+  var el = document.getElementById('displaySavedImages')
+  var sortable = Sortable.create(el, {
+    animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
+    handle: ".draggable", // Restricts sort start click/touch to the specified element
+    dragClass: "draggable", // Specifies which items inside the element should be sortable
+    onUpdate: function (evt/**Event*/){
+       var item = evt.item; // the current dragged HTMLElement
+    }
+  })
+
+  console.log(saved_array)
 
 });
-
-
- //appendImages(10);
 
 d3.json("getFullData.php?", function(error, data2) {
     if (error) {
@@ -333,7 +433,6 @@ d3.json("getFullData.php?", function(error, data2) {
         last__manuscript = d;
       }
 });
-
 function split( val ) {
       return val.split( /,\s*/ );
     }
@@ -361,10 +460,9 @@ $( "#myinput" )
           terms.pop();
           terms.push( ui.item.value );
           terms.push( "" );
-          this.value = terms.join( ", " );
+          this.value = terms.join( "" );
           return false;
         }
       });
 });
-
 </script>
